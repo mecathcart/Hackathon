@@ -10,7 +10,7 @@ import org.eclipse.mylyn.wikitext.mediawiki.core.MediaWikiLanguage;
 public class Wiki2HTML {
 	
 	public static void main(String args[]){
-		String wikitext = "Is this '''working?''' Yes it does Jean-Francois!";
+		/*String wikitext = "Is this '''working?''' Yes it does Jean-Francois!";
 		
 		MarkupParser markupParser = new MarkupParser();
 		markupParser.setMarkupLanguage(new MediaWikiLanguage());
@@ -20,12 +20,12 @@ public class Wiki2HTML {
 		GateEmbedded object = new GateEmbedded();
 		try {
 			object.setDocumentString(htmlContent);
-			object.analyze();
+			//object.analyze();
 		} catch (GateException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 }

@@ -7,6 +7,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper.Context;
+
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Corpus;
@@ -23,6 +27,7 @@ public class GateEmbedded {
 
 	/** The Corpus Pipeline application to contain ANNIE */
 	private SerialAnalyserController annieController;
+	private GateEmbedded annie = null;
 	  
 	private static String documentString = "";
 	  
@@ -114,40 +119,47 @@ public class GateEmbedded {
 	    
 	  }*/
 	  
+	  
+	  public void initGATE() throws GateException, IOException{
+		  System.out.println("Initialising GATE...");
+		    URL gHome = GateEmbedded.class.getClassLoader().getResource("org/hackreduce/awesome/GATE");
+			//try {
+				//File gateHome = new File(gHome.toURI());
+				File gateHome = new File("/tmp/GATE/src/GATE");
+				Gate.setGateHome( gateHome );		    
+			//} catch (URISyntaxException e) {
+				//e.printStackTrace();
+			//}
+
+			// initialise the GATE library
+	        Gate.init();
+		    
+		    System.out.println("...GATE initialised"); 
+		    
+		    URL url = GateEmbedded.class.getClassLoader().getResource("org/hackreduce/awesome/GATE/plugins/Annie/plugins/ANNIE");
+			Gate.getCreoleRegister().registerDirectories(url);
+			annie = new GateEmbedded();
+			annie.initAnnie();
+	  }
 	  /**
 	   * Can also run from the command-line, with a list of URLs as argument.
 	   * <P><B>NOTE:</B><BR>
 	   * This code will run with all the documents in memory - if you
 	   * want to unload each from memory after use, add code to store
 	   * the corpus in a DataStore.
+	 * @throws InterruptedException 
 	   */
-	  public void analyze() throws GateException, IOException {
-	    
-	    System.out.println("Initialising GATE...");
-	    URL gHome = GateEmbedded.class.getClassLoader().getResource("org/hackreduce/awesome/GATE");
-System.out.println(gHome);
-		try {
-			File gateHome = new File(gHome.toURI());
-			Gate.setGateHome( gateHome );		    
-		} catch (URISyntaxException e) {
-			e.printStackTrace();
-		}
-
-		// initialise the GATE library
-        Gate.init();
-	    
-	    System.out.println("...GATE initialised"); 
-
-	    URL url = GateEmbedded.class.getClassLoader().getResource("org/hackreduce/awesome/GATE/plugins/Annie/plugins/ANNIE");
-	    Gate.getCreoleRegister().registerDirectories(url);
-	    GateEmbedded annie = new GateEmbedded();
-	    annie.initAnnie();
-	    // create a document from the provided input string
-	    Document myDoc = Factory.newDocument(documentString);
+	  public void analyze(Context context, String input) throws GateException, IOException, InterruptedException {
+		// create a document from the provided input string
+	    Document myDoc = Factory.newDocument(input);
 	    // create a corpus and add the document
 	    Corpus corpus = (Corpus) Factory.createResource("gate.corpora.CorpusImpl");
 	    corpus.add(myDoc);
 	    
+	    /*URL url = GateEmbedded.class.getClassLoader().getResource("org/hackreduce/awesome/GATE/plugins/Annie/plugins/ANNIE");
+		Gate.getCreoleRegister().registerDirectories(url);
+		GateEmbedded annie = new GateEmbedded();
+		annie.initAnnie();*/
 	    annie.setCorpus(corpus);
 	    annie.execute();
 	    
@@ -167,7 +179,8 @@ System.out.println(gHome);
 	        	if(currAnnot.getFeatures().get("kind").equals("punctuation")){
 	        		continue;
 	        	}
-	            System.out.println(currAnnot.getFeatures().get("string").toString());
+	            //System.out.println(currAnnot.getFeatures().get("string").toString());
+	        	context.write(new Text(currAnnot.getFeatures().get("string").toString()), new LongWritable(1));
 	        }
 	    }
 	  }
