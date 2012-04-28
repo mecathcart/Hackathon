@@ -30,6 +30,7 @@ dependencies {
   compile 'org.apache.hadoop:hadoop-streaming:' + hadoop_version
   compile 'org.apache.hadoop:hadoop-tools:' + hadoop_version
   compile 'org.apache.hadoop:hadoop-test:' + hadoop_version
+  compile fileTree(dir: 'lib', include: '*.jar')
 }
 
 def pomConfig = {
