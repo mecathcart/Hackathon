@@ -75,6 +75,13 @@ task sourcesJar(type: Jar, dependsOn: compileJava) {
   classifier = 'sources'
 }
 
+jar {
+    from { configurations.compile.collect { 
+      // fat jar the libs
+      return it;
+    } }
+}
+
 artifacts {
   archives sourcesJar
 }
